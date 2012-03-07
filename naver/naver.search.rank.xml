@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<table xmlns="http://query.yahooapis.com/v1/schema/table.xsd">
+  <meta>
+    <author>Eunsub Kim</author>
+    <description>Naver search rank</description>
+    <sampleQuery>SELECT * FROM {table} WHERE api_key='yourKeyGoesHere'</sampleQuery>
+  </meta>
+  <bindings>
+    <select produces="XML">
+      <urls>
+        <url>http://openapi.naver.com/search?query=nexearch&amp;target=rank</url>
+      </urls>
+      <inputs>
+        <key id="key" as="api_key" type="xs:string" paramType="query" required="true"/>
+      </inputs>
+      <execute><![CDATA[
+	var get = request.get();
+        var xml = get.response;
+        var items = xml.item.*;
+
+        var out = <value></value>;
+        for(var i in items){
+          var itemEl = <item />;
+          itemEl.k.body = items[i].K.text();
+          itemEl.s.body = items[i].S.text();
+          itemEl.v.body = items[i].V.text();
+          out.item += itemEl;
+        }
+        
+
+        response.object = out;
+        ]]>
+      </execute>
+    </select>
+  </bindings>
+</table>
