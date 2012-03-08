@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<table xmlns="http://query.yahooapis.com/v1/schema/table.xsd">
+  <meta>
+    <author>Eunsub Kim</author>
+    <description>Naver search rank</description>
+    <sampleQuery>SELECT * FROM {table}</sampleQuery>
+  </meta>
+  <bindings>
+    <select>
+      <urls>
+        <url><![CDATA[
+          https://github.com/explore{-prefix|/|period}?_pjax=true&trending=true
+        ]]></url>
+      </urls>
+      
+      <inputs>
+        <key id="period" as="period" type="xs:string" paramType="path" required="false"/>
+      </inputs>
+      
+      <execute><![CDATA[
+     	var res = request.header('X-PJAX', 'true').get().response;   
+        var xml = new XML(res);
+        
+        var repos = xml..ol.li.(@["class"] != "last");
+        
+        var reposEl = <repos />;        
+        
+        for(var i in repos){
+  var repo = repos[i];
+
+        var repoEl = <repo/>;
+        
+  repoEl.watchers.body = repo..a.(@["title"] == "Watchers").text();
+  repoEl.forks.body = repo..a.(@["title"] == "Forks").text();
+  repoEl.user.body = repo.h3.a[0].text();
+  repoEl.repository.body = repo.h3.a[1].text();
+  repoEl.description.body = repo.p.text()
+        
+        reposEl.repo += repoEl;
+}
+
+        
+        response.object = reposEl;
+      ]]>  
+      </execute>
+    </select>
+  </bindings>
+</table>
