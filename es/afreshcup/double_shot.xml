@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<table xmlns="http://query.yahooapis.com/v1/schema/table.xsd">
+    <meta>
+        <author></author>
+        <description></description>
+        <documentationURL></documentationURL>
+        <sampleQuery>select * from {table}</sampleQuery>
+    </meta>
+    <bindings>
+        <select produces="XML">
+            <urls>
+                <url>http://afreshcup.com/home/rss.xml</url>
+            </urls>         
+            <inputs>
+                <key id="" type="xs:string" paramType="query" />
+            </inputs>
+            <execute>
+                <![CDATA[
+var xml = request.get().response;
+var out = <z></z>;
+var target_item = null;
+
+for each (item in xml..item){
+  var title = item..title[0].text();
+  if(title.match(/Double Shot/)){
+    target_item = item;
+    break;
+  }
+}
+
+if(target_item){
+  var body = target_item.description.toString();
+  var bodyXML = new XML("<b>"+body+"</b>");
+  var resultXML = <result />;
+
+  for each(var li in bodyXML..li){
+    var linkEl = <li></li>;
+    
+    // var terms = li.*[1].toString().split(/-/);
+    // terms.shift();
+    // var dd = terms.join("-")
+    var dd = li.*[1].toString().replace(/- /, "");
+
+    linkEl.href = li..a.@['href'];
+    linkEl.title = li..a.toString();
+    linkEl.description = dd;
+
+    resultXML.li += linkEl;
+
+    
+  }
+
+  response.object = resultXML;
+
+}else{
+  response.object = 'empty';
+}
+  
+                                          
+                ]]>
+            </execute>
+        </select>
+     </bindings>
+</table>
